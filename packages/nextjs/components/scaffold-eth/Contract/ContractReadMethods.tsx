@@ -1,28 +1,32 @@
+import { useMemo } from "react";
 import { ReadOnlyFunctionForm } from "./ReadOnlyFunctionForm";
 import { Abi, AbiFunction } from "abitype";
 import { Contract, ContractName } from "~~/utils/scaffold-eth/contract";
 
 export const ContractReadMethods = ({ deployedContractData }: { deployedContractData: Contract<ContractName> }) => {
-  if (!deployedContractData) {
+  if (!deployedContractData?.abi) {
     return null;
   }
 
-  const functionsToDisplay = (
-    ((deployedContractData.abi || []) as Abi).filter(part => part.type === "function") as AbiFunction[]
-  ).filter(fn => {
-    const isQueryableWithParams =
-      (fn.stateMutability === "view" || fn.stateMutability === "pure") && fn.inputs.length > 0;
-    return isQueryableWithParams;
-  });
+  const { abi, address } = deployedContractData;
 
-  if (!functionsToDisplay.length) {
+  const functionsToDisplay = useMemo(() => {
+    return (abi as Abi)
+      .filter(part => part.type === "function") // Filter to only functions
+      .filter((fn: AbiFunction) => {
+        // Filter to only view or pure functions with inputs
+        return (fn.stateMutability === "view" || fn.stateMutability === "pure") && fn.inputs.length > 0;
+      });
+  }, [abi]);
+
+  if (functionsToDisplay.length === 0) {
     return <>No read methods</>;
   }
 
   return (
     <>
       {functionsToDisplay.map(fn => (
-        <ReadOnlyFunctionForm contractAddress={deployedContractData.address} abiFunction={fn} key={fn.name} />
+        <ReadOnlyFunctionForm contractAddress={address} abiFunction={fn} key={fn.name} />
       ))}
     </>
   );
