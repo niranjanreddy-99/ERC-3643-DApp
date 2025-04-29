@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { AppProps } from "next/app";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
@@ -18,19 +18,14 @@ import "~~/styles/globals.css";
 const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   const price = useNativeCurrencyPrice();
   const setNativeCurrencyPrice = useGlobalState(state => state.setNativeCurrencyPrice);
-  // This variable is required for initial client side rendering of correct theme for RainbowKit
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
   const { isDarkMode } = useDarkMode();
 
+  // Fetch native currency price on mount and update global state
   useEffect(() => {
     if (price > 0) {
       setNativeCurrencyPrice(price);
     }
-  }, [setNativeCurrencyPrice, price]);
-
-  useEffect(() => {
-    setIsDarkTheme(isDarkMode);
-  }, [isDarkMode]);
+  }, [price, setNativeCurrencyPrice]);
 
   return (
     <WagmiConfig config={wagmiConfig}>
@@ -38,7 +33,7 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
       <RainbowKitProvider
         chains={appChains.chains}
         avatar={BlockieAvatar}
-        theme={isDarkTheme ? darkTheme() : lightTheme()}
+        theme={isDarkMode ? darkTheme() : lightTheme()}
       >
         <div className="flex flex-col min-h-screen">
           <Header />
