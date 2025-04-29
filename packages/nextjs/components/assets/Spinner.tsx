@@ -1,8 +1,16 @@
-export const Spinner = ({ width, height }: { width?: string; height?: string }) => {
+export const Spinner = ({
+  width = "24", // Default width
+  height = "24", // Default height
+  className = "", // Default className for custom styling
+}: {
+  width?: string;
+  height?: string;
+  className?: string;
+}) => {
   return (
     <svg
       aria-hidden="true"
-      className="mr-2 w-6 h-6 text-gray-200 dark:text-gray-300 animate-spin fill-primary-focus"
+      className={`mr-2 animate-spin fill-primary-focus ${className}`} // Combine className for custom styles
       style={{
         width,
         height,
