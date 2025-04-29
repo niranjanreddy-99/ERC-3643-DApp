@@ -9,6 +9,8 @@ const publicClient = createPublicClient({
 
 export const AddressStorageTab = ({ address }: { address: string }) => {
   const [storage, setStorage] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStorage = async () => {
@@ -31,17 +33,32 @@ export const AddressStorageTab = ({ address }: { address: string }) => {
           idx++;
         }
         setStorage(storageData);
+        setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch storage:", error);
+        setError("Failed to fetch storage");
+        setLoading(false);
       }
     };
 
     fetchStorage();
+
+    // Cleanup to cancel the effect if component unmounts
+    return () => {
+      setStorage([]);
+      setLoading(true);
+      setError(null);
+    };
   }, [address]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      {storage.length > 0 ? (
+      {error ? (
+        <div className="text-red-500">{error}</div>
+      ) : storage.length > 0 ? (
         <div className="mockup-code overflow-auto max-h-[500px]">
           <pre className="px-5 whitespace-pre-wrap break-words">
             {storage.map((data, i) => (
