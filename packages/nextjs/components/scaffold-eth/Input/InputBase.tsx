@@ -7,7 +7,7 @@ type InputBaseProps<T> = CommonInputProps<T> & {
   suffix?: ReactNode;
 };
 
-export const InputBase = <T extends { toString: () => string } | undefined = string>({
+export const InputBase = <T extends string | number | undefined = string>({
   name,
   value,
   onChange,
@@ -17,16 +17,19 @@ export const InputBase = <T extends { toString: () => string } | undefined = str
   prefix,
   suffix,
 }: InputBaseProps<T>) => {
-  let modifier = "";
-  if (error) {
-    modifier = "border-error";
-  } else if (disabled) {
-    modifier = "border-disabled bg-base-300";
-  }
+  // Determine the class modifier based on the input state (error/disabled)
+  const modifier = error
+    ? "border-error"
+    : disabled
+    ? "border-disabled bg-base-300"
+    : "";
 
+  // Handle the change event and ensure proper typing for the value
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      onChange(e.target.value as unknown as T);
+      // Convert value to the correct type before passing to onChange
+      const newValue = e.target.value as unknown as T;
+      onChange(newValue);
     },
     [onChange],
   );
