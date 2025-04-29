@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { CommonInputProps, InputBase, SIGNED_NUMBER_REGEX } from "~~/components/scaffold-eth";
 import { useGlobalState } from "~~/services/store/store";
@@ -11,8 +11,7 @@ function etherValueToDisplayValue(usdMode: boolean, etherValue: string, nativeCu
     if (Number.isNaN(parsedEthValue)) {
       return etherValue;
     } else {
-      // We need to round the value rather than use toFixed,
-      // since otherwise a user would not be able to modify the decimal value
+      // Round to 2 decimals for USD display
       return (
         Math.round(parsedEthValue * nativeCurrencyPrice * 10 ** MAX_DECIMALS_USD) /
         10 ** MAX_DECIMALS_USD
@@ -27,10 +26,9 @@ function displayValueToEtherValue(usdMode: boolean, displayValue: string, native
   if (usdMode && nativeCurrencyPrice) {
     const parsedDisplayValue = parseFloat(displayValue);
     if (Number.isNaN(parsedDisplayValue)) {
-      // Invalid number.
       return displayValue;
     } else {
-      // Compute the ETH value if a valid number.
+      // Convert display value to ETH value
       return (parsedDisplayValue / nativeCurrencyPrice).toString();
     }
   } else {
@@ -43,19 +41,23 @@ function displayValueToEtherValue(usdMode: boolean, displayValue: string, native
  *
  * onChange will always be called with the value in ETH
  */
-export const EtherInput = ({ value, name, placeholder, onChange, disabled }: CommonInputProps) => {
+export const EtherInput = ({
+  value,
+  name,
+  placeholder,
+  onChange,
+  disabled,
+}: CommonInputProps) => {
   const [transitoryDisplayValue, setTransitoryDisplayValue] = useState<string>();
-  const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrencyPrice);
+  const nativeCurrencyPrice = useGlobalState((state) => state.nativeCurrencyPrice);
   const [usdMode, setUSDMode] = useState(false);
 
-  // The displayValue is derived from the ether value that is controlled outside of the component
-  // In usdMode, it is converted to its usd value, in regular mode it is unaltered
+  // Derive the display value, adjusting based on USD mode
   const displayValue = useMemo(() => {
     const newDisplayValue = etherValueToDisplayValue(usdMode, value, nativeCurrencyPrice);
     if (transitoryDisplayValue && parseFloat(newDisplayValue) === parseFloat(transitoryDisplayValue)) {
       return transitoryDisplayValue;
     }
-    // Clear any transitory display values that might be set
     setTransitoryDisplayValue(undefined);
     return newDisplayValue;
   }, [nativeCurrencyPrice, transitoryDisplayValue, usdMode, value]);
@@ -65,8 +67,7 @@ export const EtherInput = ({ value, name, placeholder, onChange, disabled }: Com
       return;
     }
 
-    // Following condition is a fix to prevent usdMode from experiencing different display values
-    // than what the user entered. This can happen due to floating point rounding errors that are introduced in the back and forth conversion
+    // Ensure proper decimal length for USD mode
     if (usdMode) {
       const decimals = newValue.split(".")[1];
       if (decimals && decimals.length > MAX_DECIMALS_USD) {
@@ -74,14 +75,14 @@ export const EtherInput = ({ value, name, placeholder, onChange, disabled }: Com
       }
     }
 
-    // Since the display value is a derived state (calculated from the ether value), usdMode would not allow introducing a decimal point.
-    // This condition handles a transitory state for a display value with a trailing decimal sign
+    // Update transitory display value if the user types a decimal point or value ends with ".0"
     if (newValue.endsWith(".") || newValue.endsWith(".0")) {
       setTransitoryDisplayValue(newValue);
     } else {
       setTransitoryDisplayValue(undefined);
     }
 
+    // Convert the display value back to ether value if in USD mode
     const newEthValue = displayValueToEtherValue(usdMode, newValue, nativeCurrencyPrice);
     onChange(newEthValue);
   };
@@ -99,13 +100,16 @@ export const EtherInput = ({ value, name, placeholder, onChange, disabled }: Com
       disabled={disabled}
       prefix={<span className="pl-4 -mr-2 text-accent self-center">{usdMode ? "$" : "Ξ"}</span>}
       suffix={
-        <button
-          className={`btn btn-primary h-[2.2rem] min-h-[2.2rem] ${nativeCurrencyPrice > 0 ? "" : "hidden"}`}
-          onClick={toggleMode}
-          disabled={!usdMode && !nativeCurrencyPrice}
-        >
-          <ArrowsRightLeftIcon className="h-3 w-3 cursor-pointer" aria-hidden="true" />
-        </button>
+        nativeCurrencyPrice > 0 && (
+          <button
+            className={`btn btn-primary h-[2.2rem] min-h-[2.2rem] ${usdMode ? "" : "hidden"}`}
+            onClick={toggleMode}
+            disabled={!nativeCurrencyPrice}
+            aria-label={`Toggle ${usdMode ? "ETH" : "USD"} mode`}
+          >
+            <ArrowsRightLeftIcon className="h-3 w-3 cursor-pointer" aria-hidden="true" />
+          </button>
+        )
       }
     />
   );
