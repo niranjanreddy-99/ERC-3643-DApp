@@ -9,9 +9,10 @@ type MetaHeaderProps = {
   children?: React.ReactNode;
 };
 
-// Images must have an absolute path to work properly on Twitter.
-// We try to get it dynamically from Vercel, but we default to relative path.
-const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/` : "/";
+// Base URL for images (Vercel URL or fallback)
+const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/` 
+  : "/";
 
 export const MetaHeader = ({
   title = "Scaffold-ETH 2 App",
@@ -20,7 +21,7 @@ export const MetaHeader = ({
   twitterCard = "summary_large_image",
   children,
 }: MetaHeaderProps) => {
-  const imageUrl = baseUrl + image;
+  const imageUrl = `${baseUrl}${image}`;
 
   return (
     <Head>
@@ -31,6 +32,7 @@ export const MetaHeader = ({
           <meta name="twitter:title" content={title} />
         </>
       )}
+
       {description && (
         <>
           <meta name="description" content={description} />
@@ -38,12 +40,14 @@ export const MetaHeader = ({
           <meta name="twitter:description" content={description} />
         </>
       )}
+
       {image && (
         <>
           <meta property="og:image" content={imageUrl} />
           <meta name="twitter:image" content={imageUrl} />
         </>
       )}
+
       {twitterCard && <meta name="twitter:card" content={twitterCard} />}
       <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
       {children}
