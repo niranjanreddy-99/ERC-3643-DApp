@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Abi, AbiFunction } from "abitype";
 import { Address, TransactionReceipt } from "viem";
 import { useContractWrite, useNetwork, useWaitForTransaction } from "wagmi";
@@ -27,11 +27,7 @@ export const WriteOnlyFunctionForm = ({ abiFunction, onChange, contractAddress }
   const writeTxn = useTransactor();
   const writeDisabled = !chain || chain?.id !== getTargetNetwork().id;
 
-  const {
-    data: result,
-    isLoading,
-    writeAsync,
-  } = useContractWrite({
+  const { data: result, isLoading, writeAsync } = useContractWrite({
     chainId: getTargetNetwork().id,
     address: contractAddress,
     functionName: abiFunction.name,
@@ -56,33 +52,37 @@ export const WriteOnlyFunctionForm = ({ abiFunction, onChange, contractAddress }
   const { data: txResult } = useWaitForTransaction({
     hash: result?.hash,
   });
+
   useEffect(() => {
     setDisplayedTxResult(txResult);
   }, [txResult]);
 
-  // TODO use `useMemo` to optimize also update in ReadOnlyFunctionForm
-  const inputs = abiFunction.inputs.map((input, inputIndex) => {
-    const key = getFunctionInputKey(abiFunction.name, input, inputIndex);
-    return (
-      <ContractInput
-        key={key}
-        setForm={updatedFormValue => {
-          setDisplayedTxResult(undefined);
-          setForm(updatedFormValue);
-        }}
-        form={form}
-        stateObjectKey={key}
-        paramType={input}
-      />
-    );
-  });
-  const zeroInputs = inputs.length === 0 && abiFunction.stateMutability !== "payable";
+  // Memoize input elements to optimize rendering
+  const inputElements = useMemo(() => {
+    return abiFunction.inputs.map((input, inputIndex) => {
+      const key = getFunctionInputKey(abiFunction.name, input, inputIndex);
+      return (
+        <ContractInput
+          key={key}
+          setForm={updatedFormValue => {
+            setDisplayedTxResult(undefined);
+            setForm(updatedFormValue);
+          }}
+          form={form}
+          stateObjectKey={key}
+          paramType={input}
+        />
+      );
+    });
+  }, [abiFunction.inputs, form]);
+
+  const zeroInputs = inputElements.length === 0 && abiFunction.stateMutability !== "payable";
 
   return (
     <div className="py-5 space-y-3 first:pt-0 last:pb-1">
       <div className={`flex gap-3 ${zeroInputs ? "flex-row justify-between items-center" : "flex-col"}`}>
         <p className="font-medium my-0 break-words">{abiFunction.name}</p>
-        {inputs}
+        {inputElements}
         {abiFunction.stateMutability === "payable" ? (
           <IntegerInput
             value={txValue}
