@@ -9,12 +9,10 @@ import { Contract, ContractCodeStatus, ContractName, contracts } from "~~/utils/
  * @param contractName - name of deployed contract
  */
 export const useDeployedContractInfo = <TContractName extends ContractName>(contractName: TContractName) => {
-  const isMounted = useIsMounted();
-  const deployedContract = contracts?.[scaffoldConfig.targetNetwork.id]?.[0]?.contracts?.[
-    contractName as ContractName
-  ] as Contract<TContractName>;
   const [status, setStatus] = useState<ContractCodeStatus>(ContractCodeStatus.LOADING);
   const publicClient = usePublicClient({ chainId: scaffoldConfig.targetNetwork.id });
+
+  const deployedContract = contracts?.[scaffoldConfig.targetNetwork.id]?.[0]?.contracts?.[contractName as ContractName];
 
   useEffect(() => {
     const checkContractDeployment = async () => {
@@ -22,26 +20,29 @@ export const useDeployedContractInfo = <TContractName extends ContractName>(cont
         setStatus(ContractCodeStatus.NOT_FOUND);
         return;
       }
-      const code = await publicClient.getBytecode({
-        address: deployedContract.address,
-      });
 
-      if (!isMounted()) {
-        return;
-      }
-      // If contract code is `0x` => no contract deployed on that address
-      if (code === "0x") {
+      try {
+        const code = await publicClient.getBytecode({
+          address: deployedContract.address,
+        });
+
+        if (code === "0x") {
+          setStatus(ContractCodeStatus.NOT_FOUND);
+        } else {
+          setStatus(ContractCodeStatus.DEPLOYED);
+        }
+      } catch (error) {
+        console.error("Error checking contract deployment:", error);
         setStatus(ContractCodeStatus.NOT_FOUND);
-        return;
       }
-      setStatus(ContractCodeStatus.DEPLOYED);
     };
 
     checkContractDeployment();
-  }, [isMounted, contractName, deployedContract, publicClient]);
+  }, [deployedContract, publicClient]);
 
   return {
     data: status === ContractCodeStatus.DEPLOYED ? deployedContract : undefined,
     isLoading: status === ContractCodeStatus.LOADING,
+    status,
   };
 };
