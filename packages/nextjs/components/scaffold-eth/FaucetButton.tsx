@@ -15,7 +15,7 @@ const localWalletClient = createWalletClient({
 });
 
 /**
- * FaucetButton button which lets you grab eth.
+ * FaucetButton component which lets you grab ETH.
  */
 export const FaucetButton = () => {
   const { address } = useAccount();
@@ -50,14 +50,18 @@ export const FaucetButton = () => {
 
   return (
     <div
-      className={
+      className={`${
         balance
           ? ""
           : "tooltip tooltip-bottom tooltip-secondary tooltip-open font-bold before:left-auto before:transform-none before:content-[attr(data-tip)] before:right-0"
-      }
+      }`}
       data-tip="Grab funds from faucet"
     >
-      <button className="btn btn-secondary btn-sm px-2 rounded-full" onClick={sendETH} disabled={loading}>
+      <button
+        className="btn btn-secondary btn-sm px-2 rounded-full"
+        onClick={sendETH}
+        disabled={loading}
+      >
         {!loading ? (
           <BanknotesIcon className="h-4 w-4" />
         ) : (
