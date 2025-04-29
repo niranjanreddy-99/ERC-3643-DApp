@@ -43,18 +43,20 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
   const result: TransactionFunc = async (tx, options) => {
     if (!walletClient) {
       notification.error("Cannot access account");
-      console.error("⚡️ ~ file: useTransactor.tsx ~ error");
+      console.error("⚡️ ~ file: useTransactor.tsx ~ error: Wallet client not found");
       return;
     }
 
     let notificationId = null;
-    let transactionHash: Awaited<WriteContractResult>["hash"] | undefined = undefined;
+    let transactionHash: Hash | undefined = undefined;
+
     try {
       const network = await walletClient.getChainId();
       // Get full transaction from public client
       const publicClient = getPublicClient();
 
       notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
+
       if (typeof tx === "function") {
         // Tx is already prepared by the caller
         transactionHash = (await tx()).hash;
@@ -63,6 +65,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       } else {
         throw new Error("Incorrect transaction passed to transactor");
       }
+
       notification.remove(notificationId);
 
       const blockExplorerTxURL = network ? getBlockExplorerTxLink(network, transactionHash) : "";
@@ -75,6 +78,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
         hash: transactionHash,
         confirmations: options?.blockConfirmations,
       });
+
       notification.remove(notificationId);
 
       notification.success(
@@ -89,9 +93,17 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       if (notificationId) {
         notification.remove(notificationId);
       }
+
       console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
+
+      // Improved error logging with better context
       const message = getParsedError(error);
       notification.error(message);
+    } finally {
+      // Ensure that the notification is cleared after completion or error
+      if (notificationId) {
+        notification.remove(notificationId);
+      }
     }
 
     return transactionHash;
