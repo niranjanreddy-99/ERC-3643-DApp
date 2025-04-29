@@ -1,11 +1,21 @@
-export const BuidlGuidlLogo = ({ className }: { className: string }) => {
+export const BuidlGuidlLogo = ({
+  className,
+  width = "53",  // Default width
+  height = "72", // Default height
+  fill = "currentColor" // Default fill color
+}: {
+  className: string;
+  width?: string;
+  height?: string;
+  fill?: string;
+}) => {
   return (
     <svg
       className={className}
-      width="53"
-      height="72"
+      width={width}
+      height={height}
       viewBox="0 0 53 72"
-      fill="currentColor"
+      fill={fill} // Allows custom fill color
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
