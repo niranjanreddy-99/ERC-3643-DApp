@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Abi, AbiFunction } from "abitype";
 import { Address } from "viem";
 import { useContractRead } from "wagmi";
@@ -22,22 +22,30 @@ export const DisplayVariable = ({ contractAddress, abiFunction, refreshDisplayVa
     address: contractAddress,
     functionName: abiFunction.name,
     abi: [abiFunction] as Abi,
-    onError: error => {
+    onError: (error) => {
       notification.error(error.message);
     },
   });
 
   const { showAnimation } = useAnimationConfig(result);
 
+  const handleRefetch = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
   useEffect(() => {
-    refetch();
-  }, [refetch, refreshDisplayVariables]);
+    handleRefetch();
+  }, [handleRefetch, refreshDisplayVariables]);
 
   return (
     <div className="space-y-1 pb-2">
       <div className="flex items-center gap-2">
         <h3 className="font-medium text-lg mb-0 break-all">{abiFunction.name}</h3>
-        <button className="btn btn-ghost btn-xs" onClick={async () => await refetch()}>
+        <button
+          className="btn btn-ghost btn-xs"
+          onClick={handleRefetch}
+          aria-label={`Refresh ${abiFunction.name}`}
+        >
           {isFetching ? (
             <span className="loading loading-spinner loading-xs"></span>
           ) : (
