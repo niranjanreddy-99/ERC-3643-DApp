@@ -8,16 +8,17 @@ export const AddressCodeTab = ({ bytecode, assembly }: AddressCodeTabProps) => {
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      Bytecode
+      <div className="font-bold">Bytecode</div>
       <div className="mockup-code -indent-5 overflow-y-auto max-h-[500px]">
-        <pre className="px-5">
-          <code className="whitespace-pre-wrap overflow-auto break-words">{bytecode}</code>
+        <pre className="px-5 max-h-[200px] overflow-auto">
+          <code className="whitespace-pre-wrap break-words">{bytecode}</code>
         </pre>
       </div>
-      Opcodes
+
+      <div className="font-bold">Opcodes</div>
       <div className="mockup-code -indent-5 overflow-y-auto max-h-[500px]">
-        <pre className="px-5">
-          <code>{formattedAssembly}</code>
+        <pre className="px-5 max-h-[200px] overflow-auto">
+          <code className="whitespace-pre-wrap break-words">{formattedAssembly}</code>
         </pre>
       </div>
     </div>
