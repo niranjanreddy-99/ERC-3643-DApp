@@ -1,32 +1,266 @@
+/* Import Tailwind's Base, Components, and Utilities */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* Custom theme setup */
+:root {
+  --color-bg-light: #f9fafb;   /* Light background color */
+  --color-bg-dark: #1e1e2f;    /* Dark background color */
+  --color-primary: #3498db;    /* Primary color (for buttons, links, etc.) */
+  --color-secondary: #ff6347;  /* Secondary color */
+  --color-accent: #f39c12;     /* Accent color for highlighting */
+  --font-family: 'Roboto', sans-serif; /* Custom font */
+  --line-height: 1.5; /* Default line height */
+  --transition-speed: 0.3s; /* Default transition speed */
+}
+
+/* Global Styles */
 :root,
-[data-theme] {
-  background: hsl(var(--b2));
+[data-theme='dark'] {
+  --b2: 0, 0%, 12%;  /* Dark background color for dark theme */
 }
 
 body {
+  font-family: var(--font-family);
+  line-height: var(--line-height);
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: hsl(var(--b2));
+  transition: background-color var(--transition-speed) ease-in-out;
 }
 
-h1,
-h2,
-h3,
-h4 {
+/* Heading Styles */
+h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.5rem;
-  line-height: 1;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1.125rem;
+}
+
+/* Paragraph Styles */
 p {
   margin: 1rem 0;
+  color: hsl(var(--b2));
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: 0.5px;
 }
 
+/* Button Styles */
 .btn {
-  @apply shadow-md;
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-semibold transition-all ease-in-out duration-200;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  border: none;
 }
 
+.btn:hover {
+  background-color: darken(var(--color-primary), 10%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Ghost Buttons (Transparent background) */
 .btn.btn-ghost {
   @apply shadow-none;
+  background-color: transparent;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  font-weight: normal;
+}
+
+.btn.btn-ghost:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: var(--color-primary);
+}
+
+/* Input Field Styles */
+input,
+textarea,
+select {
+  @apply border border-solid border-gray-300 rounded-lg p-2.5 w-full transition-all ease-in-out duration-200;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Container Styles for Alignment */
+.container {
+  @apply mx-auto px-4 py-8;
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Flexbox and Grid Utilities */
+.flex-center {
+  @apply flex justify-center items-center;
+}
+
+.grid-center {
+  @apply grid place-items-center;
+}
+
+.grid-cols-3 {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.grid-cols-4 {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6;
+}
+
+/* Tailwind Dark Mode Customization */
+[data-theme='dark'] {
+  --color-bg-light: #1e1e2f;   /* Dark background for dark mode */
+  --color-primary: #3498db;     /* Retain primary color in dark mode */
+  --color-accent: #f39c12;      /* Retain accent color */
+  --font-family: 'Roboto', sans-serif;
+  --b2: 240, 240%, 10%; /* Dark mode background */
+  --line-height: 1.6; /* Adjust line height for dark mode */
+  transition: all 0.3s ease;
+}
+
+/* Utility Classes for Transitions and Shadows */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.shadow-lg {
+  box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-xl {
+  box-shadow: 0px 25px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Typography */
+.text-xl {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Container for Page Titles */
+.page-title {
+  @apply text-center text-4xl font-bold text-accent mb-10;
+}
+
+/* Spacing for elements */
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.pt-8 {
+  padding-top: 2rem;
+}
+
+.pb-8 {
+  padding-bottom: 2rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
+
+/* Background Color Utilities */
+.bg-light {
+  background-color: var(--color-bg-light);
+}
+
+.bg-dark {
+  background-color: var(--color-bg-dark);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-accent {
+  background-color: var(--color-accent);
+}
+
+/* Dark Mode - Style Customizations */
+[data-theme='dark'] .bg-light {
+  background-color: #2a2a3b; /* Dark background */
+}
+
+[data-theme='dark'] .bg-primary {
+  background-color: #2980b9;
+}
+
+[data-theme='dark'] .bg-accent {
+  background-color: #f39c12;
 }
