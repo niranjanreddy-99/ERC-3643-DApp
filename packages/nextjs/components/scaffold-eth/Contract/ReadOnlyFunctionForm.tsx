@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Abi, AbiFunction } from "abitype";
 import { Address } from "viem";
 import { useContractRead } from "wagmi";
@@ -31,21 +31,31 @@ export const ReadOnlyFunctionForm = ({ contractAddress, abiFunction }: TReadOnly
     },
   });
 
-  const inputElements = abiFunction.inputs.map((input, inputIndex) => {
-    const key = getFunctionInputKey(abiFunction.name, input, inputIndex);
-    return (
-      <ContractInput
-        key={key}
-        setForm={updatedFormValue => {
-          setResult(undefined);
-          setForm(updatedFormValue);
-        }}
-        form={form}
-        stateObjectKey={key}
-        paramType={input}
-      />
-    );
-  });
+  // Memoize the input elements to avoid unnecessary re-renders
+  const inputElements = useMemo(
+    () =>
+      abiFunction.inputs.map((input, inputIndex) => {
+        const key = getFunctionInputKey(abiFunction.name, input, inputIndex);
+        return (
+          <ContractInput
+            key={key}
+            setForm={updatedFormValue => {
+              setResult(undefined);
+              setForm(updatedFormValue);
+            }}
+            form={form}
+            stateObjectKey={key}
+            paramType={input}
+          />
+        );
+      }),
+    [abiFunction.inputs, form]
+  );
+
+  const handleRead = async () => {
+    const { data } = await refetch();
+    setResult(data);
+  };
 
   return (
     <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
@@ -62,10 +72,7 @@ export const ReadOnlyFunctionForm = ({ contractAddress, abiFunction }: TReadOnly
         </div>
         <button
           className="btn btn-secondary btn-sm"
-          onClick={async () => {
-            const { data } = await refetch();
-            setResult(data);
-          }}
+          onClick={handleRead}
           disabled={isFetching}
         >
           {isFetching && <span className="loading loading-spinner loading-xs"></span>}
