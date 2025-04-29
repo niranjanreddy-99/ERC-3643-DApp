@@ -8,9 +8,14 @@ import { CommonInputProps, InputBase, isENS } from "~~/components/scaffold-eth";
 /**
  * Address input with ENS name resolution
  */
-export const AddressInput = ({ value, name, placeholder, onChange, disabled }: CommonInputProps<Address | string>) => {
+export const AddressInput = ({
+  value,
+  name,
+  placeholder,
+  onChange,
+  disabled,
+}: CommonInputProps<Address | string>) => {
   // Debounce the input to keep clean RPC calls when resolving ENS names
-  // If the input is an address, we don't need to debounce it
   const _debouncedValue = useDebounce(value, 500);
   const debouncedValue = isAddress(value) ? value : _debouncedValue;
   const isDebouncedValueLive = debouncedValue === value;
@@ -68,14 +73,12 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
       prefix={
         ensName && (
           <div className="flex bg-base-300 rounded-l-full items-center">
-            {ensAvatar ? (
+            {ensAvatar && (
               <span className="w-[35px]">
-                {
-                  // eslint-disable-next-line
-                  <img className="w-full rounded-full" src={ensAvatar} alt={`${ensAddress} avatar`} />
-                }
+                {/* eslint-disable-next-line */}
+                <img className="w-full rounded-full" src={ensAvatar} alt={`${ensAddress} avatar`} />
               </span>
-            ) : null}
+            )}
             <span className="text-accent px-2">{enteredEnsName ?? ensName}</span>
           </div>
         )
