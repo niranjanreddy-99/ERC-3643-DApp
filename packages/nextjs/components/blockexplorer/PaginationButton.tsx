@@ -12,15 +12,12 @@ export const PaginationButton = ({ currentPage, totalItems, setCurrentPage }: Pa
   const isPrevButtonDisabled = currentPage === 0;
   const isNextButtonDisabled = currentPage + 1 >= Math.ceil(totalItems / ITEMS_PER_PAGE);
 
-  const prevButtonClass = isPrevButtonDisabled ? "bg-gray-200 cursor-default" : "btn btn-primary";
-  const nextButtonClass = isNextButtonDisabled ? "bg-gray-200 cursor-default" : "btn btn-primary";
-
   if (isNextButtonDisabled && isPrevButtonDisabled) return null;
 
   return (
     <div className="mt-5 justify-end flex gap-3 mx-5">
       <button
-        className={`btn btn-sm ${prevButtonClass}`}
+        className={`btn btn-sm ${isPrevButtonDisabled ? "bg-gray-200 cursor-not-allowed" : "btn-primary"}`}
         disabled={isPrevButtonDisabled}
         onClick={() => setCurrentPage(currentPage - 1)}
       >
@@ -28,7 +25,7 @@ export const PaginationButton = ({ currentPage, totalItems, setCurrentPage }: Pa
       </button>
       <span className="self-center text-primary-content font-medium">Page {currentPage + 1}</span>
       <button
-        className={`btn btn-sm ${nextButtonClass}`}
+        className={`btn btn-sm ${isNextButtonDisabled ? "bg-gray-200 cursor-not-allowed" : "btn-primary"}`}
         disabled={isNextButtonDisabled}
         onClick={() => setCurrentPage(currentPage + 1)}
       >
