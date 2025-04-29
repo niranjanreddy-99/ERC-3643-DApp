@@ -30,7 +30,8 @@ export const Header = () => {
   const [tokenAddress, setTokenAddress] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
-  async function handleLoadToken() {
+
+  const handleLoadToken = async () => {
     try {
       const response = await fetch("http://localhost:4000/update-contracts", {
         method: "POST",
@@ -45,11 +46,9 @@ export const Header = () => {
     } catch (error) {
       console.error("Error:", error);
     }
-  }
-  useOutsideClick(
-    burgerMenuRef,
-    useCallback(() => setIsDrawerOpen(false), []),
-  );
+  };
+
+  useOutsideClick(burgerMenuRef, useCallback(() => setIsDrawerOpen(false), []));
 
   const navLinks = (
     <>
@@ -71,28 +70,27 @@ export const Header = () => {
   return (
     <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
       <div className="navbar-start w-auto lg:w-1/2">
+        {/* Burger menu for mobile */}
         <div className="lg:hidden dropdown" ref={burgerMenuRef}>
           <label
             tabIndex={0}
             className={`ml-1 btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
-            onClick={() => {
-              setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
-            }}
+            onClick={() => setIsDrawerOpen(prev => !prev)}
           >
-            <Bars3Icon className="h-1/2" />
+            <Bars3Icon className="h-6 w-6" />
           </label>
           {isDrawerOpen && (
             <ul
               tabIndex={0}
               className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
-              onClick={() => {
-                setIsDrawerOpen(false);
-              }}
+              onClick={() => setIsDrawerOpen(false)}
             >
               {navLinks}
             </ul>
           )}
         </div>
+
+        {/* Logo and desktop navigation */}
         <Link href="https://www.erc3643.org/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
           <div className="flex relative w-10 h-10">
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
@@ -104,7 +102,9 @@ export const Header = () => {
         </Link>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>
       </div>
+
       <div className="navbar-end flex-grow mr-4">
+        {/* Input for Token Address and Load Button */}
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -117,8 +117,12 @@ export const Header = () => {
             Load Token
           </button>
         </div>
-        <RainbowKitCustomConnectButton />
-        <FaucetButton />
+
+        {/* Wallet and Faucet Buttons */}
+        <div className="flex gap-2 items-center">
+          <RainbowKitCustomConnectButton />
+          <FaucetButton />
+        </div>
       </div>
     </div>
   );
