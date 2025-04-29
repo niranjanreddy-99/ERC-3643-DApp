@@ -29,8 +29,8 @@ const blockieSizeMap = {
  * Displays an address (or ENS) with a Blockie image and option to copy address.
  */
 export const Address = ({ address, disableAddressLink, format, size = "base" }: TAddressProps) => {
-  const [ens, setEns] = useState<string | null>();
-  const [ensAvatar, setEnsAvatar] = useState<string | null>();
+  const [ens, setEns] = useState<string | null>(null);
+  const [ensAvatar, setEnsAvatar] = useState<string | null>(null);
   const [addressCopied, setAddressCopied] = useState(false);
 
   const { data: fetchedEns } = useEnsName({ address, enabled: isAddress(address ?? ""), chainId: 1 });
@@ -41,7 +41,6 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
     cacheTime: 30_000,
   });
 
-  // We need to apply this pattern to avoid Hydration errors.
   useEffect(() => {
     setEns(fetchedEns);
   }, [fetchedEns]);
@@ -50,7 +49,7 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
     setEnsAvatar(fetchedEnsAvatar);
   }, [fetchedEnsAvatar]);
 
-  // Skeleton UI
+  // Skeleton UI if no address is provided
   if (!address) {
     return (
       <div className="animate-pulse flex space-x-4">
@@ -62,34 +61,27 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
     );
   }
 
+  // Handle invalid address
   if (!isAddress(address)) {
     return <span className="text-error">Wrong address</span>;
   }
 
   const blockExplorerAddressLink = getBlockExplorerAddressLink(getTargetNetwork(), address);
-  let displayAddress = address?.slice(0, 5) + "..." + address?.slice(-4);
+  let displayAddress = address.slice(0, 5) + "..." + address.slice(-4);
 
+  // Use ENS name if available
   if (ens) {
     displayAddress = ens;
   } else if (format === "long") {
     displayAddress = address;
   }
 
-  return (
-    <div className="flex items-center">
-      <div className="flex-shrink-0">
-        <BlockieAvatar
-          address={address}
-          ensImage={ensAvatar}
-          size={(blockieSizeMap[size] * 24) / blockieSizeMap["base"]}
-        />
-      </div>
+  const renderAddressLink = (
+    <span className={`ml-1.5 text-${size} font-normal`}>
       {disableAddressLink ? (
-        <span className={`ml-1.5 text-${size} font-normal`}>{displayAddress}</span>
+        displayAddress
       ) : getTargetNetwork().id === hardhat.id ? (
-        <span className={`ml-1.5 text-${size} font-normal`}>
-          <Link href={blockExplorerAddressLink}>{displayAddress}</Link>
-        </span>
+        <Link href={blockExplorerAddressLink}>{displayAddress}</Link>
       ) : (
         <a
           className={`ml-1.5 text-${size} font-normal`}
@@ -100,6 +92,19 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
           {displayAddress}
         </a>
       )}
+    </span>
+  );
+
+  return (
+    <div className="flex items-center">
+      <div className="flex-shrink-0">
+        <BlockieAvatar
+          address={address}
+          ensImage={ensAvatar}
+          size={(blockieSizeMap[size] * 24) / blockieSizeMap["base"]}
+        />
+      </div>
+      {renderAddressLink}
       {addressCopied ? (
         <CheckCircleIcon
           className="ml-1.5 text-xl font-normal text-sky-600 h-5 w-5 cursor-pointer"
@@ -110,14 +115,13 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
           text={address}
           onCopy={() => {
             setAddressCopied(true);
-            setTimeout(() => {
-              setAddressCopied(false);
-            }, 800);
+            setTimeout(() => setAddressCopied(false), 800);
           }}
         >
           <DocumentDuplicateIcon
             className="ml-1.5 text-xl font-normal text-sky-600 h-5 w-5 cursor-pointer"
             aria-hidden="true"
+            aria-label="Copy address to clipboard"
           />
         </CopyToClipboard>
       )}
