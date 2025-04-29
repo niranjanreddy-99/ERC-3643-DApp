@@ -25,21 +25,23 @@ export const ContractInput = ({ setForm, form, stateObjectKey, paramType }: Cont
     value: form?.[stateObjectKey],
     placeholder: paramType.name ? `${paramType.type} ${paramType.name}` : paramType.type,
     onChange: (value: any) => {
-      setForm(form => ({ ...form, [stateObjectKey]: value }));
+      setForm((prevForm) => ({ ...prevForm, [stateObjectKey]: value }));
     },
   };
 
-  if (paramType.type === "address") {
-    return <AddressInput {...inputProps} />;
-  } else if (paramType.type === "bytes32") {
-    return <Bytes32Input {...inputProps} />;
-  } else if (paramType.type === "bytes") {
-    return <BytesInput {...inputProps} />;
-  } else if (paramType.type === "string") {
-    return <InputBase {...inputProps} />;
-  } else if (paramType.type.includes("int") && !paramType.type.includes("[")) {
-    return <IntegerInput {...inputProps} variant={paramType.type as IntegerVariant} />;
+  switch (paramType.type) {
+    case "address":
+      return <AddressInput {...inputProps} />;
+    case "bytes32":
+      return <Bytes32Input {...inputProps} />;
+    case "bytes":
+      return <BytesInput {...inputProps} />;
+    case "string":
+      return <InputBase {...inputProps} />;
+    default:
+      if (paramType.type.includes("int") && !paramType.type.includes("[")) {
+        return <IntegerInput {...inputProps} variant={paramType.type as IntegerVariant} />;
+      }
+      return <InputBase {...inputProps} />;
   }
-
-  return <InputBase {...inputProps} />;
 };
