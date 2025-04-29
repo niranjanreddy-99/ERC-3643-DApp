@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { WriteOnlyFunctionForm } from "./WriteOnlyFunctionForm";
 import { Abi, AbiFunction } from "abitype";
 import { Contract, ContractName } from "~~/utils/scaffold-eth/contract";
@@ -9,29 +10,33 @@ export const ContractWriteMethods = ({
   onChange: () => void;
   deployedContractData: Contract<ContractName>;
 }) => {
-  if (!deployedContractData) {
+  if (!deployedContractData?.abi) {
     return null;
   }
 
-  const functionsToDisplay = (
-    (deployedContractData.abi as Abi).filter(part => part.type === "function") as AbiFunction[]
-  ).filter(fn => {
-    const isWriteableFunction = fn.stateMutability !== "view" && fn.stateMutability !== "pure";
-    return isWriteableFunction;
-  });
+  const { abi, address } = deployedContractData;
+
+  const functionsToDisplay = useMemo(() => {
+    return (abi as Abi)
+      .filter(part => part.type === "function") // Filter to only functions
+      .filter((fn: AbiFunction) => {
+        // Filter to only writable functions (not view or pure)
+        return fn.stateMutability !== "view" && fn.stateMutability !== "pure";
+      });
+  }, [abi]);
 
   if (!functionsToDisplay.length) {
-    return <>No write methods</>;
+    return <p>No write methods</p>;
   }
 
   return (
     <>
       {functionsToDisplay.map((fn, idx) => (
         <WriteOnlyFunctionForm
-          key={`${fn.name}-${idx}}`}
+          key={`${fn.name}-${idx}`} // Ensure unique key by using both name and index
           abiFunction={fn}
           onChange={onChange}
-          contractAddress={deployedContractData.address}
+          contractAddress={address}
         />
       ))}
     </>
