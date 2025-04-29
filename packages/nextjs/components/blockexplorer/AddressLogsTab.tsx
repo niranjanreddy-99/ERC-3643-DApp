@@ -7,14 +7,19 @@ export const AddressLogsTab = ({ address }: { address: Address }) => {
 
   return (
     <div className="flex flex-col gap-3 p-4">
+      <div className="font-bold">Contract Logs</div>
       <div className="mockup-code overflow-auto max-h-[500px]">
-        <pre className="px-5 whitespace-pre-wrap break-words">
-          {contractLogs.map((log, i) => (
-            <div key={i}>
-              <strong>Log:</strong> {JSON.stringify(log, replacer, 2)}
-            </div>
-          ))}
-        </pre>
+        {contractLogs.length > 0 ? (
+          <pre className="px-5 whitespace-pre-wrap break-words">
+            {contractLogs.map((log, i) => (
+              <div key={i}>
+                <strong>Log {i + 1}:</strong> {JSON.stringify(log, replacer, 2)}
+              </div>
+            ))}
+          </pre>
+        ) : (
+          <div>No logs available.</div>
+        )}
       </div>
     </div>
   );
