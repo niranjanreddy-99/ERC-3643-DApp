@@ -13,6 +13,12 @@ type DisplayContent =
   | undefined
   | unknown;
 
+/**
+ * Utility function to display the result of a transaction or any data.
+ * @param displayContent The content to display (can be various types)
+ * @param asText Flag to return content as plain text
+ * @returns {string | ReactElement | number} Formatted display content
+ */
 export const displayTxResult = (
   displayContent: DisplayContent | DisplayContent[],
   asText = false,
@@ -21,26 +27,25 @@ export const displayTxResult = (
     return "";
   }
 
+  // Handle 'bigint' values, format as Ether if needed
   if (typeof displayContent === "bigint") {
-    try {
-      const asNumber = Number(displayContent);
-      if (asNumber <= Number.MAX_SAFE_INTEGER && asNumber >= Number.MIN_SAFE_INTEGER) {
-        return asNumber;
-      } else {
-        return "Ξ" + formatEther(displayContent);
-      }
-    } catch (e) {
-      return "Ξ" + formatEther(displayContent);
+    const asNumber = Number(displayContent);
+    if (asNumber <= Number.MAX_SAFE_INTEGER && asNumber >= Number.MIN_SAFE_INTEGER) {
+      return asNumber; // Convert to number if within safe integer range
     }
+    return `Ξ${formatEther(displayContent)}`; // Format as Ether if large value
   }
 
-  if (typeof displayContent === "string" && displayContent.indexOf("0x") === 0 && displayContent.length === 42) {
+  // Handle Ethereum address (42 characters starting with '0x')
+  if (typeof displayContent === "string" && displayContent.startsWith("0x") && displayContent.length === 42) {
     return asText ? displayContent : <Address address={displayContent} />;
   }
 
+  // Handle arrays and apply text formatting for readability
   if (Array.isArray(displayContent)) {
     const mostReadable = (v: DisplayContent) =>
       ["number", "boolean"].includes(typeof v) ? v : displayTxResultAsText(v);
+
     const displayable = JSON.stringify(displayContent.map(mostReadable), replacer);
 
     return asText ? (
@@ -50,7 +55,9 @@ export const displayTxResult = (
     );
   }
 
+  // Default: Return JSON stringified content (with pretty-printing)
   return JSON.stringify(displayContent, replacer, 2);
 };
 
+// Helper function for displaying content as plain text
 const displayTxResultAsText = (displayContent: DisplayContent) => displayTxResult(displayContent, true);
