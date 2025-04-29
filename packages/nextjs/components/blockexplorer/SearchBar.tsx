@@ -6,27 +6,42 @@ import { usePublicClient } from "wagmi";
 
 export const SearchBar = () => {
   const [searchInput, setSearchInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const client = usePublicClient({ chainId: hardhat.id });
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (isHex(searchInput)) {
-      try {
+    setLoading(true);
+    setError(null);
+
+    if (!searchInput) {
+      setError("Please enter a search term.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (isHex(searchInput)) {
         const tx = await client.getTransaction({ hash: searchInput });
         if (tx) {
           router.push(`/blockexplorer/transaction/${searchInput}`);
           return;
         }
-      } catch (error) {
-        console.error("Failed to fetch transaction:", error);
       }
-    }
 
-    if (isAddress(searchInput)) {
-      router.push(`/blockexplorer/address/${searchInput}`);
-      return;
+      if (isAddress(searchInput)) {
+        router.push(`/blockexplorer/address/${searchInput}`);
+        return;
+      }
+
+      setError("Invalid transaction hash or address.");
+    } catch (error) {
+      setError("An error occurred while fetching the data.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -39,9 +54,10 @@ export const SearchBar = () => {
         placeholder="Search by hash or address"
         onChange={e => setSearchInput(e.target.value)}
       />
-      <button className="btn btn-sm btn-primary" type="submit">
-        Search
+      <button className="btn btn-sm btn-primary" type="submit" disabled={loading}>
+        {loading ? "Searching..." : "Search"}
       </button>
+      {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
     </form>
   );
 };
