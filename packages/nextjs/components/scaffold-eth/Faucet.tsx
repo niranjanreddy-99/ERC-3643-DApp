@@ -24,10 +24,11 @@ export const Faucet = () => {
   const [faucetAddress, setFaucetAddress] = useState<AddressType>();
   const [sendValue, setSendValue] = useState("");
 
+// Network and transaction hooks
   const { chain: ConnectedChain } = useNetwork();
-
   const faucetTxn = useTransactor(localWalletClient);
 
+  // Fetch faucet address on component mount
   useEffect(() => {
     const getFaucetAddress = async () => {
       try {
@@ -35,16 +36,12 @@ export const Faucet = () => {
         setFaucetAddress(accounts[FAUCET_ACCOUNT_INDEX]);
       } catch (error) {
         notification.error(
-          <>
-            <p className="font-bold mt-0 mb-1">Cannot connect to local provider</p>
-            <p className="m-0">
-              - Did you forget to run <code className="italic bg-base-300 text-base font-bold">yarn chain</code> ?
-            </p>
-            <p className="mt-1 break-normal">
-              - Or you can change <code className="italic bg-base-300 text-base font-bold">targetNetwork</code> in{" "}
-              <code className="italic bg-base-300 text-base font-bold">scaffold.config.ts</code>
-            </p>
-          </>,
+          <p>
+            <strong>Cannot connect to local provider</strong>
+            <p>- Did you forget to run <code className="italic bg-base-300 text-base font-bold">yarn chain</code>?</p>
+            <p>- Or you can change <code className="italic bg-base-300 text-base font-bold">targetNetwork</code> in{" "}
+            <code className="italic bg-base-300 text-base font-bold">scaffold.config.ts</code></p>
+          </p>
         );
         console.error("⚡️ ~ file: Faucet.tsx:getFaucetAddress ~ error", error);
       }
@@ -53,7 +50,7 @@ export const Faucet = () => {
   }, []);
 
   const sendETH = async () => {
-    if (!faucetAddress) {
+    if (!faucetAddress || !inputAddress || !sendValue) {
       return;
     }
     try {
@@ -75,7 +72,7 @@ export const Faucet = () => {
     }
   };
 
-  // Render only on local chain
+  // Render only if connected to the hardhat chain
   if (ConnectedChain?.id !== hardhat.id) {
     return null;
   }
@@ -89,7 +86,6 @@ export const Faucet = () => {
       <input type="checkbox" id="faucet-modal" className="modal-toggle" />
       <label htmlFor="faucet-modal" className="modal cursor-pointer">
         <label className="modal-box relative">
-          {/* dummy input to capture event onclick on modal box */}
           <input className="h-0 w-0 absolute top-0 left-0" />
           <h3 className="text-xl font-bold mb-3">Local Faucet</h3>
           <label htmlFor="faucet-modal" className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3">
@@ -110,9 +106,9 @@ export const Faucet = () => {
               <AddressInput
                 placeholder="Destination Address"
                 value={inputAddress ?? ""}
-                onChange={value => setInputAddress(value)}
+                onChange={setInputAddress}
               />
-              <EtherInput placeholder="Amount to send" value={sendValue} onChange={value => setSendValue(value)} />
+              <EtherInput placeholder="Amount to send" value={sendValue} onChange={setSendValue} />
               <button className="h-10 btn btn-primary btn-sm px-2 rounded-full" onClick={sendETH} disabled={loading}>
                 {!loading ? (
                   <BanknotesIcon className="h-6 w-6" />
