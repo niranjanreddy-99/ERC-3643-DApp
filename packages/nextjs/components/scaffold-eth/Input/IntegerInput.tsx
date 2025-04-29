@@ -14,16 +14,25 @@ export const IntegerInput = ({
   variant = IntegerVariant.UINT256,
 }: IntegerInputProps) => {
   const [inputError, setInputError] = useState(false);
+
+  // Multiply value by 10^18 (for wei conversion)
   const multiplyBy1e18 = useCallback(() => {
-    if (!value) {
-      return;
-    }
+    if (!value) return;
+
+    let newValue: bigint;
+
     if (typeof value === "bigint") {
-      return onChange(value * 10n ** 18n);
+      newValue = value * 10n ** 18n;
+    } else {
+      const parsedValue = Number(value);
+      if (Number.isNaN(parsedValue)) return; // Invalid number
+      newValue = BigInt(Math.round(parsedValue * 10 ** 18));
     }
-    return onChange(BigInt(Math.round(Number(value) * 10 ** 18)));
+
+    onChange(newValue);
   }, [onChange, value]);
 
+  // Validate input value based on the selected variant
   useEffect(() => {
     if (isValidInteger(variant, value, false)) {
       setInputError(false);
